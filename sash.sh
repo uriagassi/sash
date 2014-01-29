@@ -1,5 +1,14 @@
+# USAGE:
+# sash machine-name - connects via SSH to a machine in your Amazon account with this machine name
+#
 
+
+# connect to machine
 function sash {
+  if [ -z $1 ]; then
+    echo "Please enter machine name"
+    return 1
+  fi
   local instance ip pem
   instance=$(ec2-describe-instances -F "tag:Name=$1" | awk -F $'\t' 'FNR == 2 {print $7 " " $17}')
 
@@ -10,7 +19,7 @@ function sash {
     ip=$(echo $instance | awk '{print $2}')
     pem=$(echo $instance | awk '{print $1}')
 
-    echo "Connecting to $1($ip)"
+    echo "Connecting to $1 ($ip)"
     ssh -i ~/.aws/$pem.pem ubuntu@$ip
   fi
 }
