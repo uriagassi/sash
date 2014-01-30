@@ -10,7 +10,7 @@ function sash {
     return 1
   fi
   local instance ip pem
-  instance=$(ec2-describe-instances -F "tag:Name=$1" | awk -F $'\t' 'FNR == 2 {print $7 " " $17}')
+  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
 
   if [ -z "${instance}" ]; then
     echo Could not find an instance named $1
@@ -31,7 +31,7 @@ function clear_sash {
 # completion command
 function _sash {
     if [ -z "${_sash_instances}" ]; then
-      _sash_instances="$(  ec2-describe-instances -F "instance-state-name=running"| grep Name | awk -F $'\t' 'BEGIN{ORS=" "} {print $5}' )"
+      _sash_instances="$(  aws ec2 describe-tags --filter Name=key,Values=Name Name=resource-type,Values=instance --query Tags[].Value --output text )"
     fi
 
     local curw
