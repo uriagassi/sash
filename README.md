@@ -1,11 +1,11 @@
-__Sash is a Secure Shell wrapper which uses `ec2_describe_instances` to find an instance's IP and PEM file by its name__
+__Sash is a Secure Shell wrapper which uses `aws-cli` to find an instance's IP and PEM file by its name__
 sash
 ====
 
 Prerequisites
 -------------
 
-1. Install [ec2 command-line tools](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SettingUp_CommandLine.html#setting_up_ec2_command_linux)
+1. Install [AWS Unified CLI](https://github.com/aws/aws-cli)
 2. Make sure you have `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` set in your environment
 3. Put all your PEM files under `~/.aws`
 
