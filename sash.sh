@@ -2,6 +2,26 @@
 # sash machine-name - connects via SSH to a machine in your Amazon account with this machine name
 #
 
+function private_dns_to_name {
+  if [ -z $1 ]; then
+    echo "Please enter private dns (ip-10-0-0-XX)"
+    return 1
+  fi
+  local instance_id instance_name
+  instance_id=$(aws ec2 describe-instances --filter "Name=private-dns-name,Values=$1.*" --query "Reservations[*].Instances[*].InstanceId" --output text)
+  if [ -z $instance_id ]; then
+    instance_id=$(aws ec2 describe-instances --filter "Name=private-dns-name,Values=$1*" --query "Reservations[*].Instances[*].InstanceId" --output text)
+  fi
+
+  if [ -z $instance_id ]; then
+    echo "No machine found with private dns $1"
+  fi
+  
+  instance_name=$(aws ec2 describe-tags --filter "Name=key,Values=Name" "Name=resource-id,Values=$instance_id" --query "Tags[].Value" --output text)
+
+  echo $instance_name
+
+}
 
 # connect to machine
 function sash {
