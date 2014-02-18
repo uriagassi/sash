@@ -12,11 +12,24 @@ Prerequisites
 Installation
 ------------
 
+linux:
+
     git clone git@github.com:uriagassi/sash.git
     cd sash
     make install
     echo "source ~/.local/bin/sash.sh" >> ~/.bashrc
     source ~/.bashrc
+    
+mac
+
+    git clone git@github.com:uriagassi/sash.git
+    cd sash
+    make install
+    echo "source ~/.local/bin/sash.sh" >> ~/.bash_profile
+    echo "export LC_ALL=en_US.UTF-8" >> ~/.bash_profile
+    echo "export LANG=en_US.UTF-8" >> ~/.bash_profile
+    source ~/.bash_profile
+    
 
 Usage
 -----
