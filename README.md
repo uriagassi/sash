@@ -12,7 +12,7 @@ Prerequisites
 Installation
 ------------
 
-linux:
+**Ubuntu/Linux**
 
     git clone git@github.com:uriagassi/sash.git
     cd sash
@@ -20,7 +20,7 @@ linux:
     echo "source ~/.local/bin/sash.sh" >> ~/.bashrc
     source ~/.bashrc
     
-mac
+**Mac**
 
     git clone git@github.com:uriagassi/sash.git
     cd sash
