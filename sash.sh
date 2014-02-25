@@ -30,7 +30,7 @@ function sash {
     return 1
   fi
   local instance ip pem
-  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
+  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
 
   if [ -z "${instance}" ]; then
     echo Could not find an instance named $1
