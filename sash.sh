@@ -29,15 +29,22 @@ function sash {
     echo "Please enter machine name"
     return 1
   fi
-  local instance ip pem
+  local instance ip pem idx re ip_idx pem_idx
+  idx=1
+  re='^[0-9]+$'
+  if [[ $2 =~ $re ]]; then
+    idx=$2
+  fi
+  let pem_idx=(idx-1)*2+1
+  let ip_idx=pem_idx+1
   instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
 
   if [ -z "${instance}" ]; then
     echo Could not find an instance named $1
     return 1
   else
-    ip=$(echo $instance | awk '{print $2}')
-    pem=$(echo $instance | awk '{print $1}')
+    ip=$(echo $instance | awk "{print \$$ip_idx}")
+    pem=$(echo $instance | awk "{print \$$pem_idx}")
 
     echo "Connecting to $1 ($ip)"
     ssh -i ~/.aws/$pem.pem ubuntu@$ip
