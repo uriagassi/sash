@@ -40,15 +40,17 @@ function sash {
   instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
 
   if [ -z "${instance}" ]; then
-    echo Could not find an instance named $1
-    return 1
-  else
-    ip=$(echo $instance | awk "{print \$$ip_idx}")
-    pem=$(echo $instance | awk "{print \$$pem_idx}")
-
-    echo "Connecting to $1 ($ip)"
-    ssh -i ~/.aws/$pem.pem ubuntu@$ip
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$1" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
+    if [ -z "${instance}" ]; then
+      echo Could not find an instance named $1
+      return 1
+    fi
   fi
+  ip=$(echo $instance | awk "{print \$$ip_idx}")
+  pem=$(echo $instance | awk "{print \$$pem_idx}")
+
+  echo "Connecting to $1 ($ip)"
+  ssh -i ~/.aws/$pem.pem ubuntu@$ip
 }
 
 function clear_sash {
