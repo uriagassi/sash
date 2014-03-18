@@ -35,7 +35,7 @@ function sash {
   if [[ $2 =~ $re ]]; then
     idx=$2
   fi
-  let pem_idx=(idx-1)*2+1
+  let pem_idx=idx*2-1
   let ip_idx=pem_idx+1
   instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
 
