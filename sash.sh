@@ -3,13 +3,12 @@
 #
 
 function private_dns_to_name {
-  dns=$1
+  local dns=$1
   if [ -z $dns ]; then
     echo "Please enter private dns (ip-10-0-0-XX)"
     return 1
   fi
-  local instance_id instance_name
-  instance_id=$(aws ec2 describe-instances --filter "Name=private-dns-name,Values=$dns.*" --query "Reservations[*].Instances[*].InstanceId" --output text)
+  local instance_id=$(aws ec2 describe-instances --filter "Name=private-dns-name,Values=$dns.*" --query "Reservations[*].Instances[*].InstanceId" --output text)
   if [ -z $instance_id ]; then
     instance_id=$(aws ec2 describe-instances --filter "Name=private-dns-name,Values=$dns*" --query "Reservations[*].Instances[*].InstanceId" --output text)
   fi
@@ -18,7 +17,7 @@ function private_dns_to_name {
     echo "No machine found with private dns $dns"
   fi
   
-  instance_name=$(aws ec2 describe-tags --filter "Name=key,Values=Name" "Name=resource-id,Values=$instance_id" --query "Tags[].Value" --output text)
+  local instance_name=$(aws ec2 describe-tags --filter "Name=key,Values=Name" "Name=resource-id,Values=$instance_id" --query "Tags[].Value" --output text)
 
   echo $instance_name
 
@@ -27,46 +26,51 @@ function private_dns_to_name {
 # connect to machine
 function sash {
   local host=$1
+
   if [ -z $host ]; then
     echo "Please enter machine name"
     return 1
   fi
-  local instance ip pem idx re ip_idx pem_idx host_idx
-  idx=1
-  re='^[0-9]+$'
-  if [[ $2 =~ $re ]]; then
-    idx=$2
-  fi
-  let pem_idx=idx*3-2
-  let ip_idx=pem_idx+1
-  let host_idx=ip_idx+1
 
-  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
+  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
 
-  if [ -z "${instance}" ]; then
+  if [[ -z $instance ]]; then
     instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
-    if [ -z "${instance}" ]; then
+    if [[ -z $instance ]]; then
       echo Could not find an instance named $host
       return 1
     fi
   fi
 
-  read -a arr <<< $instance
+  read -a instances_data <<< $instance
+
+  local number_of_instances=$((${#instances_data[@]}/3))
 
   if [[ $2 == 'list' ]]; then
-    host_idx=${#arr[@]}
-    for ((i=1; i<=${#arr[@]}/3; i++)); do
-      host=`echo ${arr[$i*3-1]} | cut -d \' -f 2`
-      printf "%s) %s (%s)\n" "$i" "${host}" "${arr[$i*3-2]}"
+    for ((i=1; i<=$number_of_instances; i++)); do
+      host=`echo ${instances_data[$i*3-1]} | cut -d \' -f 2`
+      printf "%s) %s (%s)\n" "$i" "${host}" "${instances_data[$i*3-2]}"
     done
     return 0
   fi
 
-  ip=${arr[$ip_idx - 1]}
-  pem=${arr[$pem_idx - 1]}
-  host=`echo ${arr[$host_idx - 1]} | cut -d \' -f 2`
+  local idx=1
+  local re='^[0-9]+$'
+  if [[ $2 =~ $re ]]; then
+    idx=$2
+  fi
+
+  local idx_base=(idx-1)*3
+
+  local pem=${instances_data[$idx_base]}
+  local ip=${instances_data[$idx_base + 1]}
+  host=`echo ${instances_data[$idx_base + 2]} | cut -d \' -f 2`
 
   echo "Connecting to $host ($ip)"
+  if [[ $number_of_instances > 1 ]]; then
+    echo "(out of ${number_of_instances} instances)"
+  fi
+
   ssh -i ~/.aws/$pem.pem ubuntu@$ip
 }
 
@@ -76,13 +80,11 @@ function clear_sash {
 
 # completion command
 function _sash {
-    if [ -z "${_sash_instances}" ]; then
+    if [[ -z $_sash_instances ]]; then
       _sash_instances="$( aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].Tags[?Key==`Name`].Value[]' --output text )"
     fi
 
-    local curw
-    curw=${COMP_WORDS[COMP_CWORD]}
-    COMPREPLY=($(compgen -W "${_sash_instances}" -- $curw))
+    COMPREPLY=($(compgen -W "${_sash_instances}" -- ${COMP_WORDS[COMP_CWORD]}))
 }
 
 complete -F _sash sash
