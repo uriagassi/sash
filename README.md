@@ -43,6 +43,38 @@ Also supports auto-complete (press `TAB` to get available machine names)
 To refresh the machine name cache for the autocomplete run
 
     clear_sash
+
+**Multiple instances with the same name**
+
+If there are multiple instances with the same name, the first instance returned will be selected. If you want to select another, you can do it
+by indicating the instance's appearance index (starting from one) as a second parameter.
+
+For example:
+
+    sash my-machine-name 3
+
+will connect to the third instance listed with the name `my-machine-name`.
+
+To see which instances are listed, and in what order, add `list` as the second parameter:
+
+    > sash my-machine-name list
+    1) my-machine-name (214.35.22.10)
+    2) my-machine-name (214.35.22.11)
+    3) my-machine-name (214.35.22.12)
+
+**Using wildcards**
+
+You can call `sash` with wildcards (`*`). This will select all instances matching the pattern, and connect to the one in the index indicated
+(or the first by default).
+
+    > sash my-*-name list
+    1) my-new-machine-name (214.35.23.55)
+    2) my-old-machine-name (214.32.20.10)
+    3) my-machine-name (214.32.22.10)
+
+    > sash my-*-name 2
+    Connecting to my-old-machine-name (214.32.20.10)
+    ...
     
 **Find machine name from private IP**
 
