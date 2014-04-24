@@ -64,7 +64,7 @@ function clear_sash {
 # completion command
 function _sash {
     if [ -z "${_sash_instances}" ]; then
-      _sash_instances="$(  aws ec2 describe-tags --filter Name=key,Values=Name Name=resource-type,Values=instance --query Tags[].Value --output text )"
+      _sash_instances="$( aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].Tags[?Key==`Name`].Value[]' --output text )"
     fi
 
     local curw
