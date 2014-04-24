@@ -37,12 +37,14 @@ function sash {
   if [[ $2 =~ $re ]]; then
     idx=$2
   fi
-  let pem_idx=idx*2-1
+  let pem_idx=idx*3-2
   let ip_idx=pem_idx+1
-  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
+  let host_idx=ip_idx+1
+
+  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,join(`,`,Tags[?Key==`Name`].Value)]' --output text)
 
   if [ -z "${instance}" ]; then
-    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress]' --output text)
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,join(`,`,Tags[?Key==`Name`].Value)]' --output text)
     if [ -z "${instance}" ]; then
       echo Could not find an instance named $host
       return 1
@@ -50,8 +52,10 @@ function sash {
   fi
 
   read -a arr <<< $instance
+
   ip=${arr[$ip_idx - 1]}
   pem=${arr[$pem_idx - 1]}
+  host=${arr[$host_idx - 1]}
 
   echo "Connecting to $host ($ip)"
   ssh -i ~/.aws/$pem.pem ubuntu@$ip
