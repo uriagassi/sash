@@ -48,11 +48,10 @@ function sash {
       return 1
     fi
   fi
-  set -- $(awk "{print \$$ip_idx, \$$pem_idx}" <<< $instance)
-  #ip=$(echo $instance | awk "{print \$$ip_idx}")
-  #pem=$(echo $instance | awk "{print \$$pem_idx}")
-  ip=$1
-  pem=$2
+
+  read -a arr <<< $instance
+  ip=${arr[$ip_idx - 1]}
+  pem=${arr[$pem_idx - 1]}
 
   echo "Connecting to $host ($ip)"
   ssh -i ~/.aws/$pem.pem ubuntu@$ip
