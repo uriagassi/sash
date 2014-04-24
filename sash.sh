@@ -26,12 +26,12 @@ function private_dns_to_name {
 
 # connect to machine
 function sash {
-  host=$1
+  local host=$1
   if [ -z $host ]; then
     echo "Please enter machine name"
     return 1
   fi
-  local instance ip pem idx re ip_idx pem_idx
+  local instance ip pem idx re ip_idx pem_idx host_idx
   idx=1
   re='^[0-9]+$'
   if [[ $2 =~ $re ]]; then
@@ -41,10 +41,10 @@ function sash {
   let ip_idx=pem_idx+1
   let host_idx=ip_idx+1
 
-  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,join(`,`,Tags[?Key==`Name`].Value)]' --output text)
+  instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
 
   if [ -z "${instance}" ]; then
-    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,join(`,`,Tags[?Key==`Name`].Value)]' --output text)
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
     if [ -z "${instance}" ]; then
       echo Could not find an instance named $host
       return 1
@@ -53,9 +53,18 @@ function sash {
 
   read -a arr <<< $instance
 
+  if [[ $2 == 'list' ]]; then
+    host_idx=${#arr[@]}
+    for ((i=1; i<=${#arr[@]}/3; i++)); do
+      host=`echo ${arr[$i*3-1]} | cut -d \' -f 2`
+      printf "%s) %s (%s)\n" "$i" "${host}" "${arr[$i*3-2]}"
+    done
+    return 0
+  fi
+
   ip=${arr[$ip_idx - 1]}
   pem=${arr[$pem_idx - 1]}
-  host=${arr[$host_idx - 1]}
+  host=`echo ${arr[$host_idx - 1]} | cut -d \' -f 2`
 
   echo "Connecting to $host ($ip)"
   ssh -i ~/.aws/$pem.pem ubuntu@$ip
