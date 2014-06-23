@@ -57,6 +57,18 @@ function sash {
     return 0
   fi
 
+  if [[ $cmd == 'all' ]]; then
+    shift
+    local hosts=''
+    for ((i=1; i<=$number_of_instances; i++)); do
+      hosts="$hosts ${instances_data[$i*3-2]}"
+    done
+    echo "Connecting to $number_of_instances machines ($hosts)..."
+    cssh -o "-i ~/.aws/$instances_data.pem $*" $hosts
+    return 0
+  fi
+
+
   local idx=1
   local re='^[0-9]+$'
   if [[ $cmd =~ $re ]]; then

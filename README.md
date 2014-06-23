@@ -76,6 +76,16 @@ You can call `sash` with wildcards (`*`). This will select all instances matchin
     Connecting to my-old-machine-name (214.32.20.10)
     ...
     
+**Connect to multiple machines at once**
+
+If you have [CSSH](http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/) installed, calling `sash` with `all` flag will connect to all machines at once:
+
+    > sash my-machine-name all
+    Connecting to 3 machines (214.35.22.10 214.35.22.11 214.35.22.12)
+    cssh ...
+
+*Note:* All machines are expected to have the same PEM file to connect correctly
+
 **Find machine name from private IP**
 
 [Newrelic](http://www.newrelic.com)'s server monitoring names the instances it monitors by their private IPs by default (`ip-10-0-0-12`), which is practically useless. 
