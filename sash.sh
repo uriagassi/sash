@@ -59,12 +59,23 @@ function sash {
 
   if [[ $cmd == 'all' ]]; then
     shift
-    local hosts=''
+    local hosts=()
     for ((i=1; i<=$number_of_instances; i++)); do
-      hosts="$hosts ${instances_data[$i*3-2]}"
+      hosts+=("${instances_data[$i*3-2]}")
     done
-    echo "Connecting to $number_of_instances machines ($hosts)..."
-    cssh -o "-i ~/.aws/$instances_data.pem $*" $hosts
+    echo "Connecting to $number_of_instances machines (${hosts[@]})..."
+    local command_suffix=' -o'
+    if [[ `uname` == 'Darwin' ]]; then
+      command_suffix='X --ssh_args'
+    fi
+    local ssh_args
+    if [[ $1 == '--ssh_args' ]]; then
+      shift
+      ssh_args=" $1"
+      shift
+    fi
+
+    (set -x; cssh${command_suffix} "-i ~/.aws/$instances_data.pem$ssh_args" $* ${hosts[@]/#/ubuntu@})
     return 0
   fi
 
