@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Sash : Secure AWS Shell" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Sash</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/uriagassi/sash">View on GitHub</a>
+
+          <h1 id="project_title">Sash</h1>
+          <h2 id="project_tagline">Secure AWS Shell</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/uriagassi/sash/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/uriagassi/sash/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><strong>Sash is a Secure Shell wrapper which uses <code>aws-cli</code> to find an instance's IP and PEM file by its name</strong></p>
+
+<h1>
+<a name="sash" class="anchor" href="#sash"><span class="octicon octicon-link"></span></a>sash</h1>
+
+<h2>
+<a name="prerequisites" class="anchor" href="#prerequisites"><span class="octicon octicon-link"></span></a>Prerequisites</h2>
+
+<ol>
+<li>Install <a href="https://github.com/aws/aws-cli">AWS Unified CLI</a>
+</li>
+<li>Make sure you have <code>AWS_ACCESS_KEY</code> and <code>AWS_SECRET_KEY</code> set in your environment</li>
+<li>Put all your PEM files under <code>~/.aws</code>
+</li>
+</ol><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p><strong>Ubuntu/Linux</strong></p>
+
+<pre><code>git clone git@github.com:uriagassi/sash.git
+cd sash
+make install
+echo "source ~/.local/bin/sash.sh" &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+
+<p><strong>Mac</strong></p>
+
+<pre><code>git clone git@github.com:uriagassi/sash.git
+cd sash
+make install
+echo "source ~/.local/bin/sash.sh" &gt;&gt; ~/.bash_profile
+echo "export LC_ALL=en_US.UTF-8" &gt;&gt; ~/.bash_profile
+echo "export LANG=en_US.UTF-8" &gt;&gt; ~/.bash_profile
+source ~/.bash_profile
+</code></pre>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p><strong>SSH Connect</strong></p>
+
+<pre><code>sash my-machine-name
+</code></pre>
+
+<p>Also supports auto-complete (press <code>TAB</code> to get available machine names)</p>
+
+<p>Any extra parameters will be passed to the <code>ssh</code> command:</p>
+
+<pre><code>&gt; sash my-machine-name -A
++ ssh -i ~/.aws/my.pem ubuntu@214.35.22.10 -A
+</code></pre>
+
+<p>To refresh the machine name cache for the autocomplete run</p>
+
+<pre><code>clear_sash
+</code></pre>
+
+<p><strong>Multiple instances with the same name</strong></p>
+
+<p>If there are multiple instances with the same name, the first instance returned will be selected. If you want to select another, you can do it
+by indicating the instance's appearance index (starting from one) as a second parameter.</p>
+
+<p>For example:</p>
+
+<pre><code>sash my-machine-name 3
+</code></pre>
+
+<p>will connect to the third instance listed with the name <code>my-machine-name</code>.</p>
+
+<p>To see which instances are listed, and in what order, add <code>list</code> as the second parameter:</p>
+
+<pre><code>&gt; sash my-machine-name list
+1) my-machine-name (214.35.22.10)
+2) my-machine-name (214.35.22.11)
+3) my-machine-name (214.35.22.12)
+</code></pre>
+
+<p><strong>Using wildcards</strong></p>
+
+<p>You can call <code>sash</code> with wildcards (<code>*</code>). This will select all instances matching the pattern, and connect to the one in the index indicated
+(or the first by default).</p>
+
+<pre><code>&gt; sash my-*-name list
+1) my-new-machine-name (214.35.23.55)
+2) my-old-machine-name (214.32.20.10)
+3) my-machine-name (214.32.22.10)
+
+&gt; sash my-*-name 2
+Connecting to my-old-machine-name (214.32.20.10)
+...
+</code></pre>
+
+<p><strong>Connect to multiple machines at once</strong></p>
+
+<p>If you have <a href="http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/">CSSH</a> (or <a href="https://github.com/dennishafemann/tmux-cssh">tmux-cssh</a> for OSX) installed, calling <code>sash</code> with <code>all</code> flag will connect to all machines at once: </p>
+
+<pre><code>&gt; sash my-machine-name all
+Connecting to 3 machines (214.35.22.10 214.35.22.11 214.35.22.12)
+</code></pre>
+
+<p>Any extra parameters will be passed to the <code>cssh</code> command. To pass arguments to the underlying <code>ssh</code> - pass it under <code>--ssh_args</code> as a first argument:</p>
+
+<pre><code>&gt; sash my-machine-name --ssh_args -A -p 44
++ cssh -o '-i ~/.aws/my.pem -A' -p 44 ubuntu@214.35.22.10 ubuntu@...
+</code></pre>
+
+<p><em>Note:</em> All machines are expected to have the same PEM file to connect correctly</p>
+
+<p><strong>Find machine name from private IP</strong></p>
+
+<p><a href="http://www.newrelic.com">Newrelic</a>'s server monitoring names the instances it monitors by their private IPs by default (<code>ip-10-0-0-12</code>), which is practically useless. 
+This API finds the instance which has this private IP, and returns the instance's name tag:</p>
+
+<pre><code>private_dns_to_name ip-10-XXX-XXX-XXX
+</code></pre>
+
+<p>Enjoy!</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Sash maintained by <a href="https://github.com/uriagassi">uriagassi</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
