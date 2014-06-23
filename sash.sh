@@ -26,6 +26,7 @@ function private_dns_to_name {
 # connect to machine
 function sash {
   local host=$1
+  shift
 
   if [ -z $host ]; then
     echo "Please enter machine name"
@@ -46,7 +47,9 @@ function sash {
 
   local number_of_instances=$((${#instances_data[@]}/3))
 
-  if [[ $2 == 'list' ]]; then
+  local cmd=$1
+
+  if [[ $cmd == 'list' ]]; then
     for ((i=1; i<=$number_of_instances; i++)); do
       host=`echo ${instances_data[$i*3-1]} | cut -d \' -f 2`
       printf "%s) %s (%s)\n" "$i" "${host}" "${instances_data[$i*3-2]}"
@@ -56,8 +59,9 @@ function sash {
 
   local idx=1
   local re='^[0-9]+$'
-  if [[ $2 =~ $re ]]; then
-    idx=$2
+  if [[ $cmd =~ $re ]]; then
+    idx=$cmd
+    shift
   fi
 
   local idx_base=(idx-1)*3
@@ -70,8 +74,10 @@ function sash {
   if [[ $number_of_instances > 1 ]]; then
     echo "(out of ${number_of_instances} instances)"
   fi
-
-  ssh -i ~/.aws/$pem.pem ubuntu@$ip
+  
+  set -x
+  ssh -i ~/.aws/$pem.pem ubuntu@$ip $*
+  set +x
 }
 
 function clear_sash {
