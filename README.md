@@ -84,7 +84,7 @@ You can call `sash` with wildcards (`*`). This will select all instances matchin
     
 **Connect to multiple machines at once**
 
-If you have [CSSH](http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/) (or [tmux-cssh](https://github.com/dennishafemann/tmux-cssh) for OSX) installed, calling `sash` with `all` flag will connect to all machines at once:
+If you have [CSSH](http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/) (or [tmux-cssh](https://github.com/dennishafemann/tmux-cssh) for OSX) installed, calling `sash` with `all` flag will connect to all machines at once: 
 
     > sash my-machine-name all
     Connecting to 3 machines (214.35.22.10 214.35.22.11 214.35.22.12)
