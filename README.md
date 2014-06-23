@@ -40,6 +40,12 @@ Usage
     
 Also supports auto-complete (press `TAB` to get available machine names)
 
+Any extra parameters will be passed to the `ssh` command:
+
+    > sash my-machine-name -A
+    + ssh -i ~/.aws/my.pem ubuntu@214.35.22.10 -A
+
+
 To refresh the machine name cache for the autocomplete run
 
     clear_sash
@@ -78,10 +84,15 @@ You can call `sash` with wildcards (`*`). This will select all instances matchin
     
 **Connect to multiple machines at once**
 
-If you have [CSSH](http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/) (or [csshX](https://code.google.com/p/csshx/) for OSX) installed, calling `sash` with `all` flag will connect to all machines at once:
+If you have [CSSH](http://www.unixmen.com/clusterssh-manage-multiple-ssh-sessions-on-linux/) (or [tmux-cssh](https://github.com/dennishafemann/tmux-cssh) for OSX) installed, calling `sash` with `all` flag will connect to all machines at once:
 
     > sash my-machine-name all
     Connecting to 3 machines (214.35.22.10 214.35.22.11 214.35.22.12)
+
+Any extra parameters will be passed to the `cssh` command. To pass arguments to the underlying `ssh` - pass it under `--ssh_args` as a first argument:
+
+    > sash my-machine-name --ssh_args -A -p 44
+    + cssh -o '-i ~/.aws/my.pem -A' -p 44 ubuntu@214.35.22.10 ubuntu@...
 
 *Note:* All machines are expected to have the same PEM file to connect correctly
 

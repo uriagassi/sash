@@ -65,17 +65,19 @@ function sash {
     done
     echo "Connecting to $number_of_instances machines (${hosts[@]})..."
     local command_suffix=' -o'
+    
+    command_suffix='X --ssh_args'
     if [[ `uname` == 'Darwin' ]]; then
-      command_suffix='X --ssh_args'
+      (set -x; tmux-cssh -c ~/.aws/$instances_data.pem $* ${hosts[@]/#/ubuntu@})
+    else
+      local ssh_args
+      if [[ $1 == '--ssh_args' ]]; then
+        shift
+        ssh_args=" $1"
+        shift
+      fi
+      (set -x; cssh -o "-i ~/.aws/$instances_data.pem$ssh_args" $* ${hosts[@]/#/ubuntu@})
     fi
-    local ssh_args
-    if [[ $1 == '--ssh_args' ]]; then
-      shift
-      ssh_args=" $1"
-      shift
-    fi
-
-    (set -x; cssh${command_suffix} "-i ~/.aws/$instances_data.pem$ssh_args" $* ${hosts[@]/#/ubuntu@})
     return 0
   fi
 
@@ -98,9 +100,7 @@ function sash {
     echo "(out of ${number_of_instances} instances)"
   fi
   
-  set -x
-  ssh -i ~/.aws/$pem.pem ubuntu@$ip $*
-  set +x
+  (set -x; ssh -i ~/.aws/$pem.pem ubuntu@$ip $*)
 }
 
 function clear_sash {
