@@ -96,6 +96,28 @@ Any extra parameters will be passed to the `cssh` command. To pass arguments to 
 
 *Note:* All machines are expected to have the same PEM file to connect correctly
 
+**Upload/download files**
+
+Add the keyword `upload` to upload files to the remote machine. The next parameter should be the file to upload, and the one after that the target directory (if not declared - defaults to `~`):
+
+    > sash my-machine-name upload my_file.json
+    + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.10:/home/ubuntu
+
+    > sash my-machine-name upload my_file.json /tmp/my_directory
+    + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.10:/tmp/my_directory
+
+Use the keyword `download` to download files from the remote machine (target defaults to `.`):
+
+    > sash my-machine-name download my_file.json
+    + scp -i ~/.aws/my.pem ubuntu@214.35.22.10:my_file.json .
+
+Optional parameters of machine index or `all` are supported for patterns matching more than one machine:
+
+    > sash my-machine-name upload all my_file.json
+    + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.10:/home/ubuntu
+    + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.11:/home/ubuntu
+    + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.12:/home/ubuntu
+
 **Find machine name from private IP**
 
 [Newrelic](http://www.newrelic.com)'s server monitoring names the instances it monitors by their private IPs by default (`ip-10-0-0-12`), which is practically useless. 

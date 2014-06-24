@@ -42,33 +42,57 @@ function sash {
       return 1
     fi
   fi
-
+  local instances_data
   read -a instances_data <<< $instance
+
+  eval $(_get_data pems 0 ${instances_data[@]})
+  eval $(_get_data ips 1 ${instances_data[@]})
+  eval $(_get_data hosts 2 ${instances_data[@]//[\'\[\]]/})
 
   local number_of_instances=$((${#instances_data[@]}/3))
 
   local cmd=$1
+  
+  local idx=1
+  local re='^[0-9]+$'
 
   if [[ $cmd == 'list' ]]; then
-    for ((i=1; i<=$number_of_instances; i++)); do
-      host=`echo ${instances_data[$i*3-1]} | cut -d \' -f 2`
-      printf "%s) %s (%s)\n" "$i" "${host}" "${instances_data[$i*3-2]}"
+    for ((i=1; i<=${#hosts[@]}; i++)); do
+      printf "%s) %s (%s)\n" "$i" "${hosts[$i-1]}" "${ips[$i-1]}"
+    done
+    return 0
+  fi
+
+  if [[ $cmd == 'upload' || $cmd == 'download' ]]; then
+    shift
+    local times=1
+    if [[ $1 =~ $re ]]; then
+      idx=$1
+      shift
+    elif [[ $1 == 'all' ]]; then
+      times=${#hosts[@]}
+      shift
+    fi
+    
+    for ((i=-1;i<times-1;i++)) do
+      local src=$1
+      local target=ubuntu@${ips[$idx+i]}:${2:-\/home\/ubuntu}
+      if [[ $cmd == 'download' ]]; then
+        src=ubuntu@${ips[$idx+i]}:${1}
+        target=${2:-.}
+      fi
+      (set -x; scp -i ~/.aws/${pems[$idx+i]}.pem $src $target)
     done
     return 0
   fi
 
   if [[ $cmd == 'all' ]]; then
     shift
-    local hosts=()
-    for ((i=1; i<=$number_of_instances; i++)); do
-      hosts+=("${instances_data[$i*3-2]}")
-    done
-    echo "Connecting to $number_of_instances machines (${hosts[@]})..."
-    local command_suffix=' -o'
     
-    command_suffix='X --ssh_args'
+    echo "Connecting to $number_of_instances machines (${ips[@]})..."
+    
     if [[ `uname` == 'Darwin' ]]; then
-      (set -x; tmux-cssh -c ~/.aws/$instances_data.pem $* ${hosts[@]/#/ubuntu@})
+      (set -x; tmux-cssh -c ~/.aws/$instances_data.pem $* ${ips[@]/#/ubuntu@})
     else
       local ssh_args
       if [[ $1 == '--ssh_args' ]]; then
@@ -76,24 +100,28 @@ function sash {
         ssh_args=" $1"
         shift
       fi
-      (set -x; cssh -o "-i ~/.aws/$instances_data.pem$ssh_args" $* ${hosts[@]/#/ubuntu@})
+      (set -x; cssh -o "-i ~/.aws/$instances_data.pem$ssh_args" $* ${ips[@]/#/ubuntu@})
     fi
     return 0
   fi
 
+  local scp_command
 
-  local idx=1
-  local re='^[0-9]+$'
+  if [[ $cmd == 'upload' ]]; then
+    scp_command=$cmd
+    shift
+    cmd=$1
+  fi
+
+
   if [[ $cmd =~ $re ]]; then
     idx=$cmd
     shift
   fi
 
-  local idx_base=(idx-1)*3
-
-  local pem=${instances_data[$idx_base]}
-  local ip=${instances_data[$idx_base + 1]}
-  host=`echo ${instances_data[$idx_base + 2]} | cut -d \' -f 2`
+  local pem=${pems[$idx-1]}
+  local ip=${ips[$idx-1]}
+  host=`echo ${hosts[$idx-1]} | cut -d \' -f 2`
 
   echo "Connecting to $host ($ip)"
   if [[ $number_of_instances > 1 ]]; then
@@ -101,6 +129,27 @@ function sash {
   fi
   
   (set -x; ssh -i ~/.aws/$pem.pem ubuntu@$ip $*)
+}
+
+function _get_data {
+  local var_name=$1
+  shift
+  local shift_by=$1
+  shift
+  for ((i=0; i<$shift_by; i++)); do
+    shift
+  done
+  
+  local instances_data=($*)
+  local data
+  while [[ $# -ne 0 ]]; do
+    data+=" $1"
+    shift
+    shift
+    shift
+  done
+  read -a $var_name <<< $data
+  declare -p $var_name
 }
 
 function clear_sash {
