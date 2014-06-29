@@ -89,6 +89,15 @@ source ~/.bash_profile
 <pre><code>clear_sash
 </code></pre>
 
+<p><strong>Using VPN</strong></p>
+
+<p>If you use VPN to connect to your instances, which means you connect via the machines private IP, you should set the environment variable <code>SASH_USE_VPN</code> to <code>true</code> - add the following line to <code>~/.profile</code>:</p>
+
+<pre><code>export SASH_USE_VPN=true
+</code></pre>
+
+<p>This will configure the API to connect via private IPs instead of public IPs.</p>
+
 <p><strong>Multiple instances with the same name</strong></p>
 
 <p>If there are multiple instances with the same name, the first instance returned will be selected. If you want to select another, you can do it
