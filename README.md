@@ -6,7 +6,7 @@ Prerequisites
 -------------
 
 1. Install [AWS Unified CLI](https://github.com/aws/aws-cli)
-2. Make sure you have `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` set in your environment
+2. Make sure you have `AWS_ACCESS_KEY`, `AWS_SECRET_KEY` and `AWS_DEFAULT_REGION` set in your environment
 3. Put all your PEM files under `~/.aws`
 
 Installation
