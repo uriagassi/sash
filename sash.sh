@@ -33,10 +33,16 @@ function sash {
     return 1
   fi
 
-  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
+  local ip_scope=PrivateIpAddress
+
+  if [[ -z $SASH_USE_VPN ]]; then
+    ip_scope=PublicIpAddress
+  fi
+
+  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value]" --output text)
 
   if [[ -z $instance ]]; then
-    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==`Name`].Value]' --output text)
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value]" --output text)
     if [[ -z $instance ]]; then
       echo Could not find an instance named $host
       return 1
