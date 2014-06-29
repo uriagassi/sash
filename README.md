@@ -50,6 +50,14 @@ To refresh the machine name cache for the autocomplete run
 
     clear_sash
 
+**Using VPN**
+
+If you use VPN to connect to your instances, which means you connect via the machines private IP, you should set the environment variable `SASH_USE_VPN` to `true` - add the following line to `~/.profile`:
+
+    export SASH_USE_VPN=true
+    
+This will configure the API to connect via private IPs instead of public IPs.
+
 **Multiple instances with the same name**
 
 If there are multiple instances with the same name, the first instance returned will be selected. If you want to select another, you can do it
