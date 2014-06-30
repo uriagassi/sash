@@ -126,6 +126,18 @@ Optional parameters of machine index or `all` are supported for patterns matchin
     + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.11:/home/ubuntu
     + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.12:/home/ubuntu
 
+**Machine usernames**
+
+Sash assumes the username on your machines is `ubuntu`. To change that globally, set the `SASH_DEFAULT_USER` environment variable.
+
+If you have a machine whose username is _not_ the default username, you can change it by using the `set_user` command:
+
+    sash my-machine-name set_user ec2_user
+
+This command uses EC2 Tags to set a Tag to that machine (named `SashUserName`) whose value will be used for that specific machine. To unset it, use `unset_user` command:
+
+    sash my-machine-name unset_user
+
 **Find machine name from private IP**
 
 [Newrelic](http://www.newrelic.com)'s server monitoring names the instances it monitors by their private IPs by default (`ip-10-0-0-12`), which is practically useless. 
