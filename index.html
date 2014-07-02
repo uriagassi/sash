@@ -174,6 +174,20 @@ Connecting to 3 machines (214.35.22.10 214.35.22.11 214.35.22.12)
 + scp -i ~/.aws/my.pem my_file.json ubuntu@214.35.22.12:/home/ubuntu
 </code></pre>
 
+<p><strong>Machine usernames</strong></p>
+
+<p>Sash assumes the username on your machines is <code>ubuntu</code>. To change that globally, set the <code>SASH_DEFAULT_USER</code> environment variable.</p>
+
+<p>If you have a machine whose username is <em>not</em> the default username, you can change it by using the <code>set_user</code> command:</p>
+
+<pre><code>sash my-machine-name set_user ec2_user
+</code></pre>
+
+<p>This command uses EC2 Tags to set a Tag to that machine (named <code>SashUserName</code>) whose value will be used for that specific machine. To unset it, use <code>unset_user</code> command:</p>
+
+<pre><code>sash my-machine-name unset_user
+</code></pre>
+
 <p><strong>Find machine name from private IP</strong></p>
 
 <p><a href="http://www.newrelic.com">Newrelic</a>'s server monitoring names the instances it monitors by their private IPs by default (<code>ip-10-0-0-12</code>), which is practically useless. 
@@ -194,7 +208,17 @@ This API finds the instance which has this private IP, and returns the instance'
       </footer>
     </div>
 
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("35327454");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
 
   </body>
 </html>
