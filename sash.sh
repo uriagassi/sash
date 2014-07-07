@@ -115,9 +115,9 @@ function sash {
     
     for ((i=-1;i<times-1;i++)) do
       local src=$1
-      local target=${users[$idx+1]}@${ips[$idx+i]}:${2:-\/home\/${users[$idx+1]}}
+      local target=${users[$idx+i]}@${ips[$idx+i]}:${2:-\/home\/${users[$idx+i]}}
       if [[ $cmd == 'download' ]]; then
-        src=${users[$idx+1]}@${ips[$idx+i]}:${1}
+        src=${users[$idx+i]}@${ips[$idx+i]}:${1}
         target=${2:-.}
       fi
       (set -x; scp -i ~/.aws/${pems[$idx+i]}.pem $src $target)
