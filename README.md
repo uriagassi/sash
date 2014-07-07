@@ -5,7 +5,7 @@ sash
 Prerequisites
 -------------
 
-1. Install [AWS Unified CLI](https://github.com/aws/aws-cli)
+1. Install [AWS Unified CLI](https://github.com/aws/aws-cli) (make sure you have installed version 1.3.8 or later)
 2. Make sure you have `AWS_ACCESS_KEY`, `AWS_SECRET_KEY` and `AWS_DEFAULT_REGION` set in your environment
 3. Put all your PEM files under `~/.aws`
 
