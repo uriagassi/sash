@@ -39,10 +39,10 @@ function sash {
     ip_scope=PublicIpAddress
   fi
 
-  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value,Tags[?Key==\`SashUserName\`].Value,InstanceId]" --output text)
+  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value,InstanceId,Tags[?Key==\`SashUserName\`].Value]" --output text)
 
   if [[ -z $instance ]]; then
-    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value,Tags[?Key==\`SashUserName\`].Value,InstanceId]" --output text)
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value,InstanceId,Tags[?Key==\`SashUserName\`].Value]" --output text)
     if [[ -z $instance ]]; then
       echo Could not find an instance named $host
       return 1
@@ -55,8 +55,8 @@ function sash {
   eval $(_get_data pems 0 ${instances_data[@]})
   eval $(_get_data ips 1 ${instances_data[@]})
   eval $(_get_data hosts 2 ${instances_data[@]//[\'\[\]]/})
-  eval $(_get_data users 3 ${instances_data[@]//[\'\[\]]/})
-  eval $(_get_data resource_ids 4 ${instances_data[@]//[\'\[\]]/})
+  eval $(_get_data resource_ids 3 ${instances_data[@]//[\'\[\]]/})
+  eval $(_get_data users 4 ${instances_data[@]//[\'\[\]]/})
 
   local number_of_instances=$((${#ips[@]}))
 
