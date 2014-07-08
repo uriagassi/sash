@@ -52,11 +52,8 @@ To refresh the machine name cache for the autocomplete run
 
 **Using VPN**
 
-If you use VPN to connect to your instances, which means you connect via the machines private IP, you should set the environment variable `SASH_USE_VPN` to `true` - add the following line to `~/.profile`:
-
-    export SASH_USE_VPN=true
+If you use VPN to connect to your instances, which means you connect via the machines private IP. `sash` will automatically try to connect to a machine's private IP when it has not public IP.
     
-This will configure the API to connect via private IPs instead of public IPs.
 
 **Multiple instances with the same name**
 

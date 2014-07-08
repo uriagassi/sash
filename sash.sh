@@ -33,16 +33,10 @@ function sash {
     return 1
   fi
 
-  local ip_scope=PrivateIpAddress
-
-  if [[ -z $SASH_USE_VPN ]]; then
-    ip_scope=PublicIpAddress
-  fi
-
-  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0]]" --output text)
+  local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0],PrivateIpAddress]" --output text)
 
   if [[ -z $instance ]]; then
-    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,$ip_scope,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0]]" --output text)
+    instance=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$host" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0],PrivateIpAddress]" --output text)
     if [[ -z $instance ]]; then
       echo Could not find an instance named $host
       return 1
@@ -57,6 +51,11 @@ function sash {
   eval $(_get_data hosts 2 ${instances_data[@]})
   eval $(_get_data resource_ids 3 ${instances_data[@]})
   eval $(_get_data users 4 ${instances_data[@]//None/$default_user})
+  eval $(_get_data private_ips 5 ${instances_data[@]})
+
+  for i in ${!ips[@]}; do
+    ips[i]=${ips[i]//None/${private_ips[i]}}
+  done
 
   local number_of_instances=$((${#ips[@]}))
 
@@ -189,6 +188,7 @@ function _get_data {
   local data
   while [[ $# -ne 0 ]]; do
     data+=" $1"
+    shift
     shift
     shift
     shift
