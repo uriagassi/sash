@@ -142,4 +142,10 @@ This API finds the instance which has this private IP, and returns the instance'
 
     private_dns_to_name ip-10-XXX-XXX-XXX
     
+**Amazon Profiles**
+
+Amazon CLI tools let you manage [multiple profiles](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-multiple-profiles). To set/change the default profile you want to use, you should set the `AWS_DEFAULT_PROFILE` environment variable:
+
+    export AWS_DEFAULT_PROFILE=test-user
+    
 Enjoy!
