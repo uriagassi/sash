@@ -33,7 +33,7 @@ function sash {
     return 1
   fi
 
-  local query="Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0],PrivateIpAddress]"
+  local query="Reservations[*].Instances[].[KeyName,PublicIpAddress,Tags[?Key==\`Name\`].Value | [0],InstanceId,Tags[?Key==\`SashUserName\`].Value | [0],PrivateIpAddress, Tags[?Key==\`SashForcePrivateIp\`].Value | [0]]"
 
   local instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$host" "Name=instance-state-name,Values=running" --query "$query" --output text)
 
@@ -54,9 +54,14 @@ function sash {
   eval $(_get_data resource_ids 3 ${instances_data[@]})
   eval $(_get_data users 4 ${instances_data[@]//None/$default_user})
   eval $(_get_data private_ips 5 ${instances_data[@]})
+  eval $(_get_data forceips 6 ${instances_data[@]})
 
   for i in ${!ips[@]}; do
-    ips[i]=${ips[i]//None/${private_ips[i]}}
+    if [[ ${forceips[i]} == 'True' ]]; then
+     ips[i]=${private_ips[i]}
+    else
+     ips[i]=${ips[i]//None/${private_ips[i]}}
+    fi
   done
 
   local number_of_instances=$((${#ips[@]}))
@@ -100,6 +105,31 @@ function sash {
     fi
 
     
+    return 0
+  fi
+  if [[ $cmd == 'use_private_ip' || $cmd == 'unuse_private_ip' ]]; then
+    shift
+    local resource_id
+    local resource_name
+    if [[ $1 == 'all' ]]; then
+         resource_id=${resource_ids[@]}
+	 resource_name=${hosts[@]}
+	 shift
+     elif [[ $1 =~ $re ]]; then
+	 idx=$1
+	 shift
+     fi
+     if [[ -z $resource_id ]]; then
+        resource_id=${resource_ids[$idx-1]}
+	resource_name=${hosts[$idx-1]}
+     fi
+    if [[ $cmd == 'use_private_ip' ]]; then
+	 aws ec2 create-tags --resources ${resource_id} --tags Key=SashForcePrivateIp,Value=True
+	 echo "Force private ip for $resource_name"
+    else
+	 aws ec2 delete-tags --resources ${resource_id} --tags Key=SashForcePrivateIp
+         echo "Unset force private ip for $resource_name"
+    fi
     return 0
   fi
 
@@ -196,6 +226,7 @@ function _get_data {
     shift
     shift
     shift
+    shift
   done
   read -a $var_name <<< $data
   declare -p $var_name
@@ -217,7 +248,7 @@ function _sash {
       COMPREPLY=($(compgen -W "${_sash_instances}" -- $cur))
       ;;
     2)
-       COMPREPLY=($(compgen -W "set_user unset_user upload download list all" -- $cur))
+       COMPREPLY=($(compgen -W "set_user unset_user upload download list all use_private_ip unuse_private_ip" -- $cur))
        ;;
     3)
       if [[ "${COMP_WORDS[2]}" == "upload" ]]; then
