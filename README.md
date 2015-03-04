@@ -52,7 +52,7 @@ To refresh the machine name cache for the autocomplete run
 
 **Using VPN**
 
-If you use VPN to connect to your instances, which means you connect via the machines private IP. `sash` will automatically try to connect to a machine's private IP when it has not public IP.
+If you use VPN to connect to your instances, which means you connect via the machines private IP. `sash` will automatically try to connect to a machine's private IP when it has no public IP.
     
 
 **Multiple instances with the same name**
