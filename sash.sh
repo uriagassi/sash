@@ -29,7 +29,9 @@ function sash {
   shift
 
   if [ -z $host ]; then
-    echo "Please enter machine name"
+    echo -e "usage:\tsash instance_name [list | instance_number_from_list]"
+    echo -e "\tsash private_instance_ip"
+    echo  -e "\n\tTo clean the instance list cache run 'clear_cache'"
     return 1
   fi
 
