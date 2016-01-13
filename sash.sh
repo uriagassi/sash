@@ -16,7 +16,7 @@ function private_dns_to_name {
   if [ -z $instance_id ]; then
     echo "No machine found with private dns $dns"
   fi
-  
+
   local instance_name=$(aws ec2 describe-tags --filter "Name=key,Values=Name" "Name=resource-id,Values=$instance_id" --query "Tags[].Value" --output text)
 
   echo $instance_name
@@ -45,7 +45,7 @@ function sash {
     fi
   fi
   local instances_data
-  local default_user=${SASH_DEFAULT_USER:-ubuntu}
+  local default_user=${SASH_DEFAULT_USER:-ec2-user}
   read -a instances_data <<< ${instance}
 
   eval $(_get_data pems 0 ${instances_data[@]})
@@ -62,7 +62,7 @@ function sash {
   local number_of_instances=$((${#ips[@]}))
 
   local cmd=$1
-  
+
   local idx=1
   local re='^[0-9]+$'
 
@@ -75,7 +75,7 @@ function sash {
 
   if [[ $cmd == 'set_user' || $cmd == 'unset_user' ]]; then
     shift
-    local resource_id 
+    local resource_id
     local resource_name
     if [[ $1 == 'all' ]]; then
       resource_id=${resource_ids[@]}
@@ -99,7 +99,7 @@ function sash {
       echo "Set user back to $default_user for $resource_name"
     fi
 
-    
+
     return 0
   fi
 
@@ -113,7 +113,7 @@ function sash {
       times=${#hosts[@]}
       shift
     fi
-    
+
     for ((i=-1;i<times-1;i++)) do
       local src=$1
       local target=${users[$idx+i]}@${ips[$idx+i]}:${2:-\/home\/${users[$idx+i]}}
@@ -128,7 +128,7 @@ function sash {
 
   if [[ $cmd == 'all' ]]; then
     shift
-    
+
     echo "Connecting to $number_of_instances machines (${ips[@]})..."
 
     local ips_with_user=()
@@ -173,7 +173,7 @@ function sash {
   if [[ $number_of_instances > 1 ]]; then
     echo "(out of ${number_of_instances} instances)"
   fi
-  
+
   (set -x; ssh -i ~/.aws/$pem.pem ${users[$idx-1]}@$ip $*)
 }
 
@@ -185,7 +185,7 @@ function _get_data {
   for ((i=0; i<$shift_by; i++)); do
     shift
   done
-  
+
   local instances_data=($*)
   local data
   while [[ $# -ne 0 ]]; do
