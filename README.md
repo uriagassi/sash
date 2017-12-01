@@ -1,4 +1,5 @@
-__Sash is a Secure Shell wrapper which uses `aws-cli` to find an instance's IP and PEM file by its name__
+__Sash is a Secure Shell wrapper which uses `aws-cli` to find an instance's IP and PEM file by its name[<sup>*</sup>](#other_sash)__
+
 sash
 ====
 
@@ -149,3 +150,5 @@ Amazon CLI tools let you manage [multiple profiles](http://docs.aws.amazon.com/c
     export AWS_DEFAULT_PROFILE=test-user
     
 Enjoy!
+
+<sub><a name="other_sash">*</a> Apparently, there is another product called sash, which is a [Stand alone shell](https://en.wikipedia.org/wiki/Stand-alone_shell), which is unrelated to this project.</sub>
