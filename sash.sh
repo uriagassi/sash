@@ -46,7 +46,7 @@ function sash {
   fi
   local instances_data
   local default_user=${SASH_DEFAULT_USER:-ubuntu}
-  read -a instances_data <<< ${instance}
+  read -a instances_data <<< $(echo ${instance} | xargs)
 
   eval $(_get_data pems 0 ${instances_data[@]})
   eval $(_get_data ips 1 ${instances_data[@]})
