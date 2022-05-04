@@ -1,2 +1,8 @@
 markdown: redcarpet
 path: http://sash.agassi.co.il
+google_analytics: G-XGFBK25DN2
+analytics:
+  provider               : "google-gtag"
+  google:
+    measurement_id          : "G-XGFBK25DN2"
+    anonymize_ip         : false
